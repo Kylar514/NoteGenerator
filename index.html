@@ -1,0 +1,672 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="manifest.json" />
+    <title>Field Service Note Generator</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        font-size: 14px;
+        padding: 10px;
+        max-width: 750px;
+        margin: auto;
+        background-color: hsl(0, 0%, 100%);
+        color: hsl(0, 0%, 0%);
+        line-height: 1.6;
+      }
+
+      h2 {
+        text-align: center;
+      }
+
+      label {
+        display: block;
+        font-weight: bold;
+      }
+
+      input[type='text'],
+      textarea {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        background-color: hsl(0, 0%, 100%);
+        color: hsl(0, 0%, 0%);
+        border: 1px solid hsl(0, 0%, 80%);
+        border-radius: 6px;
+        box-sizing: border-box;
+      }
+
+      textarea {
+        resize: vertical;
+      }
+
+      .button-row {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 10px;
+        gap: 10px;
+      }
+
+      .case-type-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+        justify-content: center;
+      }
+
+      .case-type-group label {
+        display: inline-flex;
+        align-items: center;
+        padding: 1px 5px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px hsla(0, 0%, 0%, 0.1);
+        border: 1px solid hsl(0, 0%, 80%);
+        cursor: pointer;
+        font-weight: normal;
+        user-select: text;
+        background-color: hsl(0, 0%, 100%);
+        color: hsl(0, 0%, 0%);
+        transition: all 0.2s ease;
+      }
+
+      .case-type-group label:hover {
+        background-color: hsl(0, 0%, 95%);
+        box-shadow: 0 6px 10px hsla(0, 0%, 0%, 0.15);
+        transform: translateY(-1px);
+      }
+
+      .case-type-group input[type='radio'] {
+        margin-right: 6px;
+      }
+
+      .options label {
+        font-weight: normal;
+      }
+
+      .checkbox-group {
+        flex-wrap: wrap;
+        display: grid;
+        gap: 5px 10px;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      }
+
+      .checkbox-group label {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        padding: 1px 6px;
+        border-radius: 4px;
+        font-weight: normal;
+        transition: background 0.2s;
+        cursor: pointer;
+      }
+
+      .checkbox-group label:hover {
+        background-color: hsl(0, 0%, 95%);
+      }
+
+      .checkbox-group input[type='checkbox'],
+      .checkbox-group input[type='radio'] {
+        width: 16px;
+        height: 16px;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      div[id$='Form'] {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid hsl(0, 0%, 88%);
+        background-color: hsl(0, 0%, 98%);
+      }
+
+      #output {
+        display: none;
+        margin-top: 20px;
+        background: hsl(0, 0%, 96%);
+        padding: 12px;
+        font-family: monospace;
+        word-wrap: break-word;
+        border-radius: 6px;
+        box-shadow: 0 2px 6px hsla(0, 0%, 0%, 0.08);
+      }
+
+      button {
+        margin-top: 10px;
+        padding: 10px;
+        font-size: 16px;
+        color: hsl(0, 0%, 0%);
+        background-color: hsl(0, 0%, 100%);
+        border-radius: 8px;
+        box-shadow: 0 4px 6px hsla(0, 0%, 0%, 0.1);
+        border: 1px solid hsl(0, 0%, 80%);
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      button:hover {
+        background-color: hsl(0, 0%, 96%);
+        box-shadow: 0 6px 10px hsla(0, 0%, 0%, 0.15);
+        transform: translateY(-1px);
+      }
+
+      @media (prefers-color-scheme: dark) {
+        body {
+          background-color: hsl(0, 0%, 7%);
+          color: hsl(0, 0%, 92%);
+        }
+
+        input[type='text'],
+        textarea {
+          background-color: hsl(0, 0%, 12%);
+          color: hsl(0, 0%, 92%);
+          border: 1px solid hsl(0, 0%, 27%);
+        }
+
+        .checkbox-group label:hover {
+          background-color: hsl(0, 0%, 10%);
+        }
+
+        div[id$='Form'] {
+          background-color: hsl(0, 0%, 10%);
+          border: 1px solid hsl(0, 0%, 20%);
+        }
+
+        #output {
+          background-color: hsl(0, 0%, 12%);
+          box-shadow: 0 2px 6px hsla(0, 0%, 0%, 0.5);
+        }
+
+        button {
+          background-color: hsl(0, 0%, 12%);
+          color: hsl(0, 0%, 100%);
+          border: 1px solid hsl(0, 0%, 27%);
+          box-shadow: 0 4px 6px hsla(0, 0%, 0%, 0.5);
+        }
+
+        button:hover {
+          background-color: hsl(0, 0%, 16%);
+          box-shadow: 0 6px 10px hsla(0, 0%, 0%, 0.7);
+        }
+
+        .case-type-group label {
+          background-color: hsl(0, 0%, 12%);
+          color: hsl(0, 0%, 92%);
+          border: 1px solid hsl(0, 0%, 30%);
+          box-shadow: 0 4px 6px hsla(0, 0%, 0%, 0.5);
+        }
+
+        .case-type-group label:hover {
+          background-color: hsl(0, 0%, 18%);
+          box-shadow: 0 6px 10px hsla(0, 0%, 0%, 0.7);
+          transform: translateY(-1px);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Field Service Note Generator</h2>
+
+    <label>Case Type:</label>
+    <div class="case-type-group">
+      <label>
+        <input type="radio" name="caseType" value="serviceCallForm" checked />
+        Service Call
+      </label>
+      <label>
+        <input type="radio" name="caseType" value="pmForm" />
+        PM Case
+      </label>
+      <label>
+        <input type="radio" name="caseType" value="qualityCheckForm" />
+        Quality Check
+      </label>
+      <label>
+        <input type="radio" name="caseType" value="auditForm" />
+        Audit Case
+      </label>
+      <label>
+        <input type="radio" name="caseType" value="installRemovalForm" />
+        Install/Removal
+      </label>
+    </div>
+
+    <div id="serviceCallForm">
+      <label for="scEquipment">Equipment Type(s) Worked on Call:</label>
+      <input type="text" id="scEquipment" placeholder="Enter equipment" />
+      <label for="scRoot">Root Cause of Failure:</label>
+      <textarea id="scRoot" placeholder="Enter root cause"></textarea>
+      <label for="scResolution">Resolution Steps Taken:</label>
+      <textarea id="scResolution" placeholder="Enter resolution steps"></textarea>
+
+      <label>Any deviation from dispatched RID?</label>
+      <div class="options">
+        <label>
+          <input type="radio" name="scDeviation" value="No RID error" checked />
+          No deviation from RID
+        </label>
+        <label>
+          <input type="radio" name="scDeviation" value="Yes" />
+          Yes
+        </label>
+      </div>
+
+      <div id="scDeviationNotesDiv" class="hidden">
+        <textarea id="scDeviationNotes" placeholder="Describe deviation"></textarea>
+      </div>
+
+      <label>Visit Reason:</label>
+      <div class="options">
+        <label>
+          <input type="radio" name="scVisit" value="Service Call" checked />
+          Service Call
+        </label>
+        <label>
+          <input type="radio" name="scVisit" value="Lottery Request" />
+          Lottery Request
+        </label>
+        <label>
+          <input type="radio" name="scVisit" value="Self-Initiated" />
+          Self-Initiated
+        </label>
+      </div>
+    </div>
+
+    <div id="pmForm" class="hidden">
+      <label for="pmDate">Last PM Date:</label>
+      <input type="text" id="pmDate" placeholder="MM/DD/YYYY" />
+
+      <label>Equipment PMed:</label>
+      <div class="checkbox-group" id="equipmentPMed"></div>
+
+      <label>Equipment Serviced During PM:</label>
+      <div class="checkbox-group" id="equipmentServiced"></div>
+
+      <div id="servicedNotesDiv" class="hidden">
+        <label for="servicedNotes">Describe what was done to the serviced equipment:</label>
+        <textarea id="servicedNotes" placeholder="Enter details"></textarea>
+      </div>
+
+      <label>Type of PM:</label>
+      <div class="options">
+        <label>
+          <input type="radio" name="pmType" value="Self-Initiated" checked />
+          Self-Initiated
+        </label>
+        <label>
+          <input type="radio" name="pmType" value="Lottery Request" />
+          Lottery Request
+        </label>
+        <label>
+          <input type="radio" name="pmType" value="Scheduled" />
+          Scheduled
+        </label>
+        <label>
+          <input type="radio" name="pmType" value="Integrated" />
+          Integrated
+        </label>
+      </div>
+
+      <label for="pmComments">Technician Comments:</label>
+      <textarea id="techComments" placeholder="Enter notes, including case number if equipment replaced"></textarea>
+    </div>
+
+    <div id="qualityCheckForm" class="hidden">
+      <label for="qcDate">Last Visit Date:</label>
+      <input type="text" id="qcDate" placeholder="MM/DD/YYYY" />
+
+      <label>Visit Type:</label>
+      <div class="options">
+        <label>
+          <input type="radio" name="qcVisitType" value="Tech Initiated" checked />
+          Tech Initiated
+        </label>
+        <label>
+          <input type="radio" name="qcVisitType" value="Supervisor Initiated" />
+          Supervisor Initiated
+        </label>
+        <label>
+          <input type="radio" name="qcVisitType" value="Lottery Initiated" />
+          Lottery Initiated
+        </label>
+        <label>
+          <input type="radio" name="qcVisitType" value="Other" />
+          Other
+        </label>
+      </div>
+      <div id="qcOtherDiv" class="hidden">
+        <input type="text" id="qcOtherText" placeholder="Specify other visit type" />
+      </div>
+
+      <label for="qcReason">Reason for visit:</label>
+      <textarea id="qcReason" placeholder="Enter reason for visit"></textarea>
+
+      <label for="qcAdditional">Additional work completed:</label>
+      <textarea id="qcAdditional" placeholder="Enter additional work"></textarea>
+
+      <label for="qcComments">Technician Comments:</label>
+      <textarea id="qcComments" placeholder="Enter notes"></textarea>
+    </div>
+
+    <div id="auditForm" class="hidden">
+      <label for="auditDate">Last Audit Date:</label>
+      <input type="text" id="auditDate" placeholder="MM/DD/YYYY" />
+
+      <label>Audit Type:</label>
+      <div class="checkbox-group">
+        <label>
+          <input type="checkbox" id="equipmentAudit" />
+          Equipment Audit
+        </label>
+        <label>
+          <input type="checkbox" id="suppliesAudit" />
+          Supplies Audit
+        </label>
+      </div>
+
+      <div id="equipmentListContainer" class="hidden">
+        <label>Equipment Audited:</label>
+        <div class="checkbox-group" id="equipmentAuditList"></div>
+      </div>
+
+      <div id="suppliesListContainer" class="hidden">
+        <label for="suppliesAudited">Supplies Audited:</label>
+        <textarea id="suppliesAudited" placeholder="Enter supplies audited"></textarea>
+      </div>
+
+      <label for="auditComments">Technician Comments:</label>
+      <textarea id="auditComments" placeholder="Enter notes"></textarea>
+    </div>
+
+    <div id="installRemovalForm" class="hidden">
+      <label for="irDate">Date Installed/Removed:</label>
+      <input type="text" id="irDate" placeholder="MM/DD/YYYY" />
+
+      <label>Action:</label>
+      <div class="options">
+        <label>
+          <input type="radio" name="irAction" value="Install" checked />
+          Install
+        </label>
+        <label>
+          <input type="radio" name="irAction" value="Removal" />
+          Removal
+        </label>
+      </div>
+
+      <label>Equipment Installed/Removed:</label>
+      <div class="checkbox-group" id="equipmentIR"></div>
+
+      <label for="irNotes">Technician Comments:</label>
+      <textarea id="irNotes" placeholder="Enter notes"></textarea>
+    </div>
+
+    <div class="button-row">
+      <div>
+        <button onclick="generateOutput()">Generate</button>
+        <button onclick="copyOutput()">Copy</button>
+      </div>
+      <div>
+        <button onclick="clearForm()">Clear</button>
+      </div>
+    </div>
+    <div id="output"></div>
+
+    <script>
+      // ----------------------------
+      // Constants & Helper Functions
+      // ----------------------------
+      const formIds = ['serviceCallForm', 'pmForm', 'qualityCheckForm', 'auditForm', 'installRemovalForm'];
+      const equipmentList = [
+        'Flex',
+        'Ultra Printer',
+        'BCR',
+        'TSP',
+        'Dell',
+        'Playtable',
+        'Custom Printer',
+        '7" Monitor',
+        'Ventus Primary',
+        'CradlePoint',
+        'Ventus Backup',
+        'Access Points',
+        'Keypad',
+        'SS jackpot',
+        'DS jackpot',
+        'Counter jackpot',
+        'LVM 20',
+        'LVM 28',
+        'Bursters',
+        'Other',
+      ];
+
+      const valueOrNone = (val) => (val?.trim() ? val.trim() : 'None');
+      const valuesOrNone = (...ids) => ids.map((id) => valueOrNone(document.getElementById(id)?.value || ''));
+
+      const toggleDiv = (id, show) => document.getElementById(id)?.classList.toggle('hidden', !show);
+      const getCheckedValues = (containerId, allowOther = false) => {
+        const container = document.getElementById(containerId);
+        if (!container) return [];
+        const checked = Array.from(container.querySelectorAll('input[type="checkbox"]:checked')).map((cb) => cb.value);
+        if (allowOther && checked.includes('Other')) {
+          const otherInput = container.querySelector('input[type="text"]');
+          if (otherInput?.value.trim()) checked[checked.indexOf('Other')] = otherInput.value.trim();
+        }
+        return checked;
+      };
+
+      // ----------------------------
+      // Checkbox Creation & Initialization
+      // ----------------------------
+      function initCheckboxes(containerId, { addOtherInput = false, onChange } = {}) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.innerHTML = '';
+
+        equipmentList.forEach((item) => {
+          const label = document.createElement('label');
+          const cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.value = item;
+          label.appendChild(cb);
+          label.appendChild(document.createTextNode(' ' + item));
+          container.appendChild(label);
+        });
+
+        if (addOtherInput) {
+          const otherInput = document.createElement('input');
+          otherInput.type = 'text';
+          otherInput.placeholder = 'Enter other equipment';
+          otherInput.id = containerId + '_other';
+          otherInput.classList.add('hidden');
+          container.appendChild(otherInput);
+
+          container.querySelectorAll('input[type="checkbox"]').forEach((cb) => {
+            cb.addEventListener('change', () => toggleDiv(otherInput.id, cb.value === 'Other' && cb.checked));
+          });
+        }
+
+        if (onChange) {
+          container
+            .querySelectorAll('input[type="checkbox"]')
+            .forEach((cb) => cb.addEventListener('change', () => onChange(cb)));
+        }
+      }
+
+      // ----------------------------
+      // Radio Handling
+      // ----------------------------
+      function setupRadioGroup(name, onChange) {
+        document.querySelectorAll(`input[name="${name}"]`).forEach((r) => r.addEventListener('change', onChange));
+      }
+
+      setupRadioGroup('caseType', (e) => {
+        formIds.forEach((f) => document.getElementById(f)?.classList.add('hidden'));
+        document.getElementById(e.target.value)?.classList.remove('hidden');
+      });
+
+      setupRadioGroup('scDeviation', () =>
+        toggleDiv('scDeviationNotesDiv', document.querySelector('input[name="scDeviation"]:checked')?.value === 'Yes')
+      );
+
+      setupRadioGroup('qcVisitType', () =>
+        toggleDiv('qcOtherDiv', document.querySelector('input[name="qcVisitType"]:checked')?.value === 'Other')
+      );
+
+      // ----------------------------
+      // Initialize Checkboxes
+      // ----------------------------
+      initCheckboxes('equipmentPMed', { addOtherInput: true });
+
+      initCheckboxes('equipmentServiced', {
+        addOtherInput: true,
+        onChange: () => {
+          const anyChecked = Array.from(document.querySelectorAll("#equipmentServiced input[type='checkbox']")).some(
+            (c) => c.checked
+          );
+          toggleDiv('servicedNotesDiv', anyChecked);
+        },
+      });
+
+      initCheckboxes('equipmentIR', { addOtherInput: true });
+
+      initCheckboxes('equipmentAuditList', { addOtherInput: true });
+
+      document
+        .getElementById('equipmentAudit')
+        ?.addEventListener('change', () =>
+          toggleDiv('equipmentListContainer', document.getElementById('equipmentAudit').checked)
+        );
+
+      document
+        .getElementById('suppliesAudit')
+        ?.addEventListener('change', () =>
+          toggleDiv('suppliesListContainer', document.getElementById('suppliesAudit').checked)
+        );
+
+      // ----------------------------
+      // Output Generation
+      // ----------------------------
+      function generateServiceCallOutput() {
+        const [eq, root, res] = valuesOrNone('scEquipment', 'scRoot', 'scResolution');
+        const deviation = document.querySelector('input[name="scDeviation"]:checked')?.value;
+        const deviationNotes =
+          deviation === 'Yes' ? valueOrNone(document.getElementById('scDeviationNotes')?.value) : 'No RID error';
+        const visit = document.querySelector('input[name="scVisit"]:checked')?.value || 'None';
+        return `${eq} | ${root} | ${res} | ${deviationNotes} | ${visit}`;
+      }
+
+      function generatePMOutput() {
+        const [pmDate] = valuesOrNone('pmDate');
+        const eqPMed = getCheckedValues('equipmentPMed', true).join(', ') || 'None';
+        const eqServicedChecked = getCheckedValues('equipmentServiced', true);
+        const servicedNotes = document.getElementById('servicedNotes')?.value.trim();
+        const eqServiced =
+          servicedNotes && eqServicedChecked.length
+            ? eqServicedChecked.join(', ') + ': ' + servicedNotes
+            : servicedNotes || eqServicedChecked.join(', ') || 'No equipment serviced';
+        const pmType = document.querySelector('input[name="pmType"]:checked')?.value || 'None';
+        const comments = valueOrNone(document.getElementById('techComments')?.value);
+        return `${pmDate} | ${eqPMed} | ${eqServiced} | ${pmType} | ${comments}`;
+      }
+
+      function generateQCOutput() {
+        const [qcDate] = valuesOrNone('qcDate');
+        let visitType = document.querySelector('input[name="qcVisitType"]:checked')?.value || 'None';
+        if (visitType === 'Other') visitType = valueOrNone(document.getElementById('qcOtherText')?.value);
+        const [reason, additional, comments] = valuesOrNone('qcReason', 'qcAdditional', 'qcComments');
+        return `${qcDate} | ${visitType} | ${reason} | ${additional} | ${comments}`;
+      }
+
+      function generateAuditOutput() {
+        const [auditDate, auditComments] = valuesOrNone('auditDate', 'auditComments');
+        const equipmentAuditChecked = document.getElementById('equipmentAudit')?.checked;
+        const suppliesAuditChecked = document.getElementById('suppliesAudit')?.checked;
+        const auditTypes = [];
+        if (equipmentAuditChecked) auditTypes.push('Equipment Audit');
+        if (suppliesAuditChecked) auditTypes.push('Supplies Audit');
+        const auditTypeText = auditTypes.length ? auditTypes.join(', ') : 'None';
+        const equipmentListText = equipmentAuditChecked ? getCheckedValues('equipmentAuditList', true).join(', ') : '';
+        const suppliesListText = suppliesAuditChecked ? document.getElementById('suppliesAudited')?.value.trim() : '';
+        const assetsAudited = valueOrNone([equipmentListText, suppliesListText].filter(Boolean).join(', '));
+        return `${auditDate} | ${auditTypeText} | ${assetsAudited} | ${auditComments}`;
+      }
+
+      function generateInstallRemovalOutput() {
+        const [date] = valuesOrNone('irDate');
+        const action = document.querySelector('input[name="irAction"]:checked')?.value || 'None';
+        const equipment = getCheckedValues('equipmentIR', true).join(', ') || 'None';
+        const installComments = valueOrNone(document.getElementById('irNotes').value);
+        return `${date} | ${action} | ${equipment} | ${installComments}`;
+      }
+
+      // ----------------------------
+      // Button functions
+      // ----------------------------
+      function generateOutput() {
+        const visibleForm = formIds.find((f) => !document.getElementById(f)?.classList.contains('hidden'));
+        let output = '';
+        switch (visibleForm) {
+          case 'serviceCallForm':
+            output = generateServiceCallOutput();
+            break;
+          case 'pmForm':
+            output = generatePMOutput();
+            break;
+          case 'qualityCheckForm':
+            output = generateQCOutput();
+            break;
+          case 'auditForm':
+            output = generateAuditOutput();
+            break;
+          case 'installRemovalForm':
+            output = generateInstallRemovalOutput();
+            break;
+        }
+        const outputDiv = document.getElementById('output');
+        if (outputDiv) {
+          outputDiv.textContent = output;
+          outputDiv.style.display = output.trim() ? 'block' : 'none';
+        }
+      }
+
+      function copyOutput() {
+        const text = document.getElementById('output')?.textContent;
+        if (!text) return;
+        navigator.clipboard?.writeText(text) ||
+          (() => {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+          })();
+      }
+
+      function clearForm() {
+        location.reload();
+      }
+
+      // ----------------------------
+      // Service Worker
+      // ----------------------------
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker
+          .register('/service-worker.js')
+          .then(() => console.log('Service worker registered'))
+          .catch(console.error);
+      }
+    </script>
+  </body>
+</html>
