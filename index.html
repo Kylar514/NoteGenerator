@@ -574,7 +574,7 @@
         const eqServiced =
           servicedNotes && eqServicedChecked.length
             ? eqServicedChecked.join(', ') + ': ' + servicedNotes
-            : servicedNotes || eqServicedChecked.join(', ') || 'No equipment serviced';
+            : servicedNotes || eqServicedChecked.join(', ') || 'None, Scheduled PM';
         const pmType = document.querySelector('input[name="pmType"]:checked')?.value || 'None';
         const comments = valueOrNone(document.getElementById('techComments')?.value);
         return `${pmDate} | ${eqPMed} | ${eqServiced} | ${pmType} | ${comments}`;
